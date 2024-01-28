@@ -3,12 +3,12 @@ Zig bindings for the sokol headers are here: https://github.com/floooh/sokol-zig
 
 ## Build and Run
 
-The main branch is supposed to work with the current zig-dev version (but may
-fall behind from time to time).
+The main branch is supposed to work with the Mach nominated zig version (but may
+fall behind from time to time). Download it from [Here](https://machengine.org/about/nominated-zig/)
 
 Check the git branches for use with older Zig versions.
 
-To build and run the native version:
+To build and run the native version from root directory:
 
 ```bash
 zig build run
