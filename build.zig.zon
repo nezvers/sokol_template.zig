@@ -1,0 +1,17 @@
+.{
+    .name = "my_template",
+    .version = "0.0.0",
+    .paths = .{
+        "src",
+        "build.zig",
+        "build.zig.zon",
+        "LICENSE",
+        "README.md",
+    },
+    .dependencies = .{
+        .sokol = .{
+            .url = "git+https://github.com/floooh/sokol-zig.git#b33fcc7ca192bc2a4387900b23f8041f128fbc09",
+            .hash = "12201728e1ac5e3202a994dc0a1403889a17c738deddd5ad14289f7dae2b904cbebe",
+        },
+    },
+}
