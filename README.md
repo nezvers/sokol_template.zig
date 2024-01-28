@@ -1,4 +1,4 @@
-# my_template.zig
+# sokol-template.zig
 Zig bindings for the sokol headers are here: https://github.com/floooh/sokol-zig
 
 ## Build and Run
