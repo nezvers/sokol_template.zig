@@ -5,6 +5,7 @@ Zig bindings for the sokol headers are here: https://github.com/floooh/sokol-zig
 
 The main branch is supposed to work with the Mach nominated zig version (but may
 fall behind from time to time). Download it from [Here](https://machengine.org/about/nominated-zig/)
+Don't forget to add Zig's executable folder to your operating systems evironment `PATH`.
 
 Check the git branches for use with older Zig versions.
 
