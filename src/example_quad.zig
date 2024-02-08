@@ -14,8 +14,6 @@ const state = struct {
     var pass_action: gfx.PassAction = .{};
 };
 
-//var update_callback = init_frame;
-
 pub fn main() void {
     sapp.run(.{
         .init_cb = init,
@@ -31,7 +29,6 @@ pub fn main() void {
 }
 
 export fn init() void {
-    renderer.graphics.init();
     gfx.setup(.{
         .context = sokol.app_gfx_glue.context(),
         .logger = .{ .func = log.func },

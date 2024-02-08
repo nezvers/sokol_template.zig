@@ -28,6 +28,7 @@ fn buildNative(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, 
         .root_source_file = .{ .path = "src/main.zig" },
     });
     my_template.root_module.addImport("sokol", dep_sokol.module("sokol"));
+    try append_libraries(b, target, optimize, my_template);
     b.installArtifact(my_template);
     const run = b.addRunArtifact(my_template);
     b.step("run", "Run my_template").dependOn(&run.step);
@@ -42,6 +43,7 @@ fn buildWeb(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, dep
         .root_source_file = .{ .path = "src/main.zig" },
     });
     my_template.root_module.addImport("sokol", dep_sokol.module("sokol"));
+    try append_libraries(b, target, optimize, my_template);
 
     // create a build step which invokes the Emscripten linker
     const emsdk = dep_sokol.builder.dependency("emsdk", .{});
@@ -59,4 +61,17 @@ fn buildWeb(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, dep
     const run = sokol.emRunStep(b, .{ .name = "my_template", .emsdk = emsdk });
     run.step.dependOn(&link_step.step);
     b.step("run", "Run my_template").dependOn(&run.step);
+}
+
+fn append_libraries(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, app: *Build.Step.Compile) !void {
+    const asset_lib = b.addStaticLibrary(.{
+        .name = "assets",
+        // In this case the main source file is merely a path, however, in more
+        // complicated build scripts, this could be a generated file.
+        .root_source_file = .{ .path = "assets/assets.zig" },
+        .target = target,
+        .optimize = optimize,
+    });
+    app.linkLibrary(asset_lib);
+    b.installArtifact(asset_lib);
 }
