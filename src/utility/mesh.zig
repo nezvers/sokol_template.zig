@@ -5,6 +5,7 @@ const math = @import("math.zig");
 const vec2 = math.Vec2;
 const vec3 = math.Vec3;
 const uv = math.Vec2;
+const vertex_format = gfx.VertexFormat;
 
 pub const color_3b = struct {
     r: f32,
@@ -49,4 +50,5 @@ pub const quad = struct {
     };
     pub const indices = [_]u16{ 0, 1, 2, 0, 2, 3 };
     pub const get_shader_desc = quad_shd.quadShaderDesc;
+    pub const vertex_attributes = [3]vertex_format{ .FLOAT3, .FLOAT2, .FLOAT4 };
 };

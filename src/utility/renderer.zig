@@ -1,11 +1,22 @@
 //const shd = @import("../shaders/quad_mesh.glsl.zig");
 const sokol = @import("sokol");
+const gfx = sokol.gfx;
+const sapp = sokol.app;
+const log = sokol.log;
 const time = sokol.time;
+const mesh = @import("mesh.zig");
+const assets = @import("../lib_headers/assets_h.zig");
 const math = @import("math.zig");
 const vec2 = math.Vec2;
 const vec3 = math.Vec3;
 const vec4 = math.Vec4;
 const mat4 = math.Mat4;
+
+const state = struct {
+    var bind: gfx.Bindings = .{};
+    var pip: gfx.Pipeline = .{};
+    var pass_action: gfx.PassAction = .{};
+};
 
 // template struct
 const graphics_struct = struct {
@@ -41,10 +52,10 @@ const graphics_struct = struct {
         g.near_plane = 0.01;
         g.far_plane = 150.0;
 
-        g.update_view();
+        g.update_perspective_view();
     }
 
-    pub fn update_view(g: *graphics_struct) void {
+    pub fn update_perspective_view(g: *graphics_struct) void {
         const fov: f32 = 75.0;
         const aspect: f32 = g.viewport_size.x / g.viewport_size.y;
         g.proj_mat = math.Mat4.persp(fov, aspect, g.near_plane, g.far_plane);
@@ -85,3 +96,54 @@ const graphics_struct = struct {
 };
 
 pub var graphics: graphics_struct = undefined;
+
+pub fn init() void {
+    gfx.setup(.{
+        .context = sokol.app_gfx_glue.context(),
+        .logger = .{ .func = log.func },
+    });
+
+    // a vertex buffer
+    state.bind.vertex_buffers[0] = gfx.makeBuffer(.{
+        .data = gfx.asRange(&mesh.quad.vertices),
+    });
+
+    // an index buffer
+    state.bind.index_buffer = gfx.makeBuffer(.{
+        .type = .INDEXBUFFER,
+        .data = gfx.asRange(&mesh.quad.indices),
+    });
+
+    // a shader and pipeline state object
+    var pip_desc: gfx.PipelineDesc = .{
+        .index_type = .UINT16,
+        .shader = gfx.makeShader(mesh.quad.get_shader_desc(gfx.queryBackend())),
+    };
+    // shader vertex input
+    for (mesh.quad.vertex_attributes, 0..) |attr, i| {
+        pip_desc.layout.attrs[i].format = attr;
+    }
+    state.pip = gfx.makePipeline(pip_desc);
+
+    // clear to black
+    state.pass_action.colors[0] = .{
+        .load_action = .CLEAR,
+        .clear_value = .{ .r = 0, .g = 0, .b = 0, .a = 1 },
+    };
+
+    // Initialize graphics
+    graphics.init();
+}
+
+pub fn frame() void {
+    gfx.beginDefaultPass(state.pass_action, sapp.width(), sapp.height());
+    gfx.applyPipeline(state.pip);
+    gfx.applyBindings(state.bind);
+    gfx.draw(0, 6, 1);
+    gfx.endPass();
+    gfx.commit();
+}
+
+pub fn cleanup() void {
+    gfx.shutdown();
+}
