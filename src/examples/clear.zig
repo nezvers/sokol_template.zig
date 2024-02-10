@@ -1,55 +1,19 @@
-//------------------------------------------------------------------------------
-//  clear.zig
-//
-//  Just clear the framebuffer with an animated color.
-//------------------------------------------------------------------------------
-const sokol = @import("sokol");
-const slog = sokol.log;
-const sg = sokol.gfx;
-const sapp = sokol.app;
-const sgapp = sokol.app_gfx_glue;
-const print = @import("std").debug.print;
+const delve = @import("delve");
+const app = delve.app;
 
-var pass_action: sg.PassAction = .{};
+// This example does nothing but open a blank window!
 
-export fn init() void {
-    sg.setup(.{
-        .context = sgapp.context(),
-        .logger = .{ .func = slog.func },
-    });
-    pass_action.colors[0] = .{
-        .load_action = .CLEAR,
-        .clear_value = .{ .r = 1, .g = 1, .b = 0, .a = 1 },
+pub fn main() !void {
+    const clear_module = delve.modules.Module{
+        .name = "clear_example",
+        .init_fn = on_init,
     };
-    print("Backend: {}\n", .{sg.queryBackend()});
+
+    try delve.modules.registerModule(clear_module);
+
+    try app.start(app.AppConfig{ .title = "Delve Framework - Clear Example" });
 }
 
-export fn frame() void {
-    const g = pass_action.colors[0].clear_value.g + 0.01;
-    pass_action.colors[0].clear_value.g = if (g > 1.0) 0.0 else g;
-    sg.beginDefaultPass(pass_action, sapp.width(), sapp.height());
-    sg.endPass();
-    sg.commit();
-}
-
-export fn cleanup() void {
-    sg.shutdown();
-}
-
-pub fn main() void {
-    sapp.run(.{
-        .init_cb = init,
-        .frame_cb = frame,
-        .cleanup_cb = cleanup,
-        .width = 640,
-        .height = 480,
-        .icon = .{
-            .sokol_default = true,
-        },
-        .window_title = "clear.zig",
-        .logger = .{
-            .func = slog.func,
-        },
-        .win32_console_attach = true,
-    });
+pub fn on_init() void {
+    delve.platform.graphics.setClearColor(delve.colors.examples_bg_dark);
 }

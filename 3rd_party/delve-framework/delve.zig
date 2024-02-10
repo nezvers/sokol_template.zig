@@ -10,7 +10,7 @@ pub const math = @import("math.zig");
 
 pub const platform = struct {
     pub const app = @import("platform/app.zig");
-    //pub const audio = @import("platform/audio.zig");
+    pub const audio = @import("platform/audio.zig");
     pub const graphics = @import("platform/graphics.zig");
     pub const input = @import("platform/input.zig");
 };
