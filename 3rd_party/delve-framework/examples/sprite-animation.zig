@@ -57,7 +57,7 @@ pub fn on_init() void {
         debug.log("Could not load image", .{});
         return;
     };
-    defer spritesheet_image.destroy();
+    defer spritesheet_image.deinit();
 
     // make the texture to draw and a default shader
     sprite_texture = graphics.Texture.init(&spritesheet_image);
@@ -109,7 +109,7 @@ pub fn on_draw() void {
 
     // setup our view to draw with
     const projection = graphics.getProjectionPerspective(60, 0.01, 20.0);
-    var view = math.Mat4.lookat(.{ .x = 0.0, .y = 0.0, .z = 5.0 }, math.Vec3.zero(), math.Vec3.up());
+    const view = math.Mat4.lookat(.{ .x = 0.0, .y = 0.0, .z = 5.0 }, math.Vec3.zero(), math.Vec3.up());
 
     // draw the sprite batch
     sprite_batch.draw(projection.mul(view), math.Mat4.identity());

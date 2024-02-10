@@ -2,7 +2,7 @@ const delve = @import("delve");
 const app = delve.app;
 
 const fps_module = delve.module.fps_counter;
-const audio_example = @import("audio.zig");
+//const audio_example = @import("audio.zig");
 const debugdraw_example = @import("debugdraw.zig");
 const meshes_example = @import("meshes.zig");
 const sprites_example = @import("sprites.zig");
@@ -16,7 +16,7 @@ const lua_module = delve.module.lua_simple;
 
 pub fn main() !void {
     try fps_module.registerModule();
-    try audio_example.registerModule();
+    //try audio_example.registerModule();
     try debugdraw_example.registerModule();
     try meshes_example.registerModule();
     try lua_module.registerModule();
