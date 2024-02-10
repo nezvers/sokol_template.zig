@@ -23,6 +23,10 @@ pub const Vec2 = extern struct {
     pub fn new(x: f32, y: f32) Vec2 {
         return Vec2{ .x = x, .y = y };
     }
+
+    pub fn equal(a: Vec2, b: Vec2) bool {
+        return math.approxEqAbs(f32, a.x, b.x, 0.0001) and math.approxEqAbs(f32, a.y, b.y, 0.0001);
+    }
 };
 
 pub const Vec4 = extern struct {

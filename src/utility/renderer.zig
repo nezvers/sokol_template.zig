@@ -55,6 +55,12 @@ const graphics_struct = struct {
         g.update_perspective_view();
     }
 
+    pub fn frame(g: *graphics_struct) void {
+        g.set_viewport(sapp.width(), sapp.height());
+        g.update_perspective_view();
+        g.update_render_textures();
+    }
+
     pub fn update_perspective_view(g: *graphics_struct) void {
         const fov: f32 = 75.0;
         const aspect: f32 = g.viewport_size.x / g.viewport_size.y;
@@ -64,6 +70,13 @@ const graphics_struct = struct {
         g.view_mat = math.Mat4.lookat(g.cam_pos, look_dir, g.cam_up);
 
         g.proj_view_mat = math.Mat4.mul(g.proj_mat, g.view_mat);
+    }
+
+    pub fn update_render_textures(g: *graphics_struct) void {
+        // TODO: check against render texture
+        if (!vec2.equal(g.viewport_size, g.viewport_size)) {
+            return;
+        }
     }
 
     pub fn set_viewport(g: *graphics_struct, pos: vec2, size: vec2) void {
@@ -137,9 +150,11 @@ pub fn init() void {
 
 pub fn frame() void {
     gfx.beginDefaultPass(state.pass_action, sapp.width(), sapp.height());
+    // I assume this is pipeline per shader
     gfx.applyPipeline(state.pip);
     gfx.applyBindings(state.bind);
     gfx.draw(0, 6, 1);
+
     gfx.endPass();
     gfx.commit();
 }
