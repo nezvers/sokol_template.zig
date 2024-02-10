@@ -3,6 +3,7 @@
     .version = "0.0.0",
     .paths = .{
         "src",
+        "assets",
         "build.zig",
         "build.zig.zon",
         "LICENSE",
@@ -10,8 +11,17 @@
     },
     .dependencies = .{
         .sokol = .{
-            .url = "git+https://github.com/floooh/sokol-zig.git#b33fcc7ca192bc2a4387900b23f8041f128fbc09",
-            .hash = "12201728e1ac5e3202a994dc0a1403889a17c738deddd5ad14289f7dae2b904cbebe",
+            .url = "git+https://github.com/nezvers/sokol-zig-branch.git#af72c30fd0b6abe200f75f6cd3ad6a2a722d398e",
+            .hash = "12207e03150cbd9cf7210a5bab9086cbefc03334a03d2f2bbac257f02bc540c81c0b",
+        },
+        .zmesh = .{
+            .path = "3rd_party/zmesh",
+        },
+        .ziglua = .{
+            .path = "3rd_party/ziglua",
+        },
+        .zstbi = .{
+            .path = "3rd_party/zstbi",
         },
     },
 }

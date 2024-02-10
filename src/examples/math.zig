@@ -6,6 +6,7 @@
 //
 //  Ported from HandmadeMath.h
 //------------------------------------------------------------------------------
+const assert = @import("std").debug.assert;
 const math = @import("std").math;
 
 fn radians(deg: f32) f32 {
@@ -174,3 +175,118 @@ pub const Mat4 = extern struct {
         return res;
     }
 };
+
+test "Vec3.zero" {
+    const v = Vec3.zero();
+    assert(v.x == 0.0 and v.y == 0.0 and v.z == 0.0);
+}
+
+test "Vec3.new" {
+    const v = Vec3.new(1.0, 2.0, 3.0);
+    assert(v.x == 1.0 and v.y == 2.0 and v.z == 3.0);
+}
+
+test "Mat4.ident" {
+    const m = Mat4.identity();
+    for (m.m, 0..) |row, y| {
+        for (row, 0..) |val, x| {
+            if (x == y) {
+                assert(val == 1.0);
+            } else {
+                assert(val == 0.0);
+            }
+        }
+    }
+}
+
+test "Mat4.mul" {
+    const l = Mat4.identity();
+    const r = Mat4.identity();
+    const m = Mat4.mul(l, r);
+    for (m.m, 0..) |row, y| {
+        for (row, 0..) |val, x| {
+            if (x == y) {
+                assert(val == 1.0);
+            } else {
+                assert(val == 0.0);
+            }
+        }
+    }
+}
+
+fn eq(val: f32, cmp: f32) bool {
+    const delta: f32 = 0.00001;
+    return (val > (cmp - delta)) and (val < (cmp + delta));
+}
+
+test "Mat4.persp" {
+    const m = Mat4.persp(60.0, 1.33333337, 0.01, 10.0);
+
+    assert(eq(m.m[0][0], 1.73205));
+    assert(eq(m.m[0][1], 0.0));
+    assert(eq(m.m[0][2], 0.0));
+    assert(eq(m.m[0][3], 0.0));
+
+    assert(eq(m.m[1][0], 0.0));
+    assert(eq(m.m[1][1], 2.30940));
+    assert(eq(m.m[1][2], 0.0));
+    assert(eq(m.m[1][3], 0.0));
+
+    assert(eq(m.m[2][0], 0.0));
+    assert(eq(m.m[2][1], 0.0));
+    assert(eq(m.m[2][2], -1.00200));
+    assert(eq(m.m[2][3], -1.0));
+
+    assert(eq(m.m[3][0], 0.0));
+    assert(eq(m.m[3][1], 0.0));
+    assert(eq(m.m[3][2], -0.02002));
+    assert(eq(m.m[3][3], 0.0));
+}
+
+test "Mat4.lookat" {
+    const m = Mat4.lookat(.{ .x = 0.0, .y = 1.5, .z = 6.0 }, Vec3.zero(), Vec3.up());
+
+    assert(eq(m.m[0][0], 1.0));
+    assert(eq(m.m[0][1], 0.0));
+    assert(eq(m.m[0][2], 0.0));
+    assert(eq(m.m[0][3], 0.0));
+
+    assert(eq(m.m[1][0], 0.0));
+    assert(eq(m.m[1][1], 0.97014));
+    assert(eq(m.m[1][2], 0.24253));
+    assert(eq(m.m[1][3], 0.0));
+
+    assert(eq(m.m[2][0], 0.0));
+    assert(eq(m.m[2][1], -0.24253));
+    assert(eq(m.m[2][2], 0.97014));
+    assert(eq(m.m[2][3], 0.0));
+
+    assert(eq(m.m[3][0], 0.0));
+    assert(eq(m.m[3][1], 0.0));
+    assert(eq(m.m[3][2], -6.18465));
+    assert(eq(m.m[3][3], 1.0));
+}
+
+test "Mat4.rotate" {
+    const m = Mat4.rotate(2.0, .{ .x = 0.0, .y = 1.0, .z = 0.0 });
+
+    assert(eq(m.m[0][0], 0.99939));
+    assert(eq(m.m[0][1], 0.0));
+    assert(eq(m.m[0][2], -0.03489));
+    assert(eq(m.m[0][3], 0.0));
+
+    assert(eq(m.m[1][0], 0.0));
+    assert(eq(m.m[1][1], 1.0));
+    assert(eq(m.m[1][2], 0.0));
+    assert(eq(m.m[1][3], 0.0));
+
+    assert(eq(m.m[2][0], 0.03489));
+    assert(eq(m.m[2][1], 0.0));
+    assert(eq(m.m[2][2], 0.99939));
+    assert(eq(m.m[2][3], 0.0));
+
+    assert(eq(m.m[3][0], 0.0));
+    assert(eq(m.m[3][1], 0.0));
+    assert(eq(m.m[3][2], 0.0));
+    assert(eq(m.m[3][3], 1.0));
+}

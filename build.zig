@@ -2,6 +2,10 @@ const std = @import("std");
 const Build = std.Build;
 const OptimizeMode = std.builtin.OptimizeMode;
 const sokol = @import("sokol");
+const zmesh = @import("zmesh");
+const zstbi = @import("zstbi");
+
+const root_source_file = "3rd_party/delve-framework/examples/forest.zig";
 
 pub fn build(b: *Build) !void {
     const target = b.standardTargetOptions(.{});
@@ -25,9 +29,12 @@ fn buildNative(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, 
         .name = "my_template",
         .target = target,
         .optimize = optimize,
-        .root_source_file = .{ .path = "src/main.zig" },
+        //.root_source_file = .{ .path = "src/main.zig" },
+        .root_source_file = .{ .path = root_source_file },
     });
-    my_template.root_module.addImport("sokol", dep_sokol.module("sokol"));
+    //my_template.root_module.addImport("sokol", dep_sokol.module("sokol"));
+    try setup_links(b, target, optimize, my_template, dep_sokol);
+
     b.installArtifact(my_template);
     const run = b.addRunArtifact(my_template);
     b.step("run", "Run my_template").dependOn(&run.step);
@@ -39,9 +46,11 @@ fn buildWeb(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, dep
         .name = "my_template",
         .target = target,
         .optimize = optimize,
-        .root_source_file = .{ .path = "src/main.zig" },
+        //.root_source_file = .{ .path = "src/main.zig" },
+        .root_source_file = .{ .path = root_source_file },
     });
-    my_template.root_module.addImport("sokol", dep_sokol.module("sokol"));
+    //my_template.root_module.addImport("sokol", dep_sokol.module("sokol"));
+    try setup_links(b, target, optimize, my_template, dep_sokol);
 
     // create a build step which invokes the Emscripten linker
     const emsdk = dep_sokol.builder.dependency("emsdk", .{});
@@ -59,4 +68,68 @@ fn buildWeb(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, dep
     const run = sokol.emRunStep(b, .{ .name = "my_template", .emsdk = emsdk });
     run.step.dependOn(&link_step.step);
     b.step("run", "Run my_template").dependOn(&run.step);
+}
+
+fn setup_links(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, step_compile: *Build.Step.Compile, dep_sokol: *Build.Dependency) !void {
+
+    // Delve module
+    const delve_module = create_delve_module(b, target, optimize);
+    // - sokol
+    delve_module.addImport("sokol", dep_sokol.module("sokol"));
+    // - ziglua
+    delve_module.addImport("ziglua", b.dependency("ziglua", .{
+        .target = target,
+        .optimize = optimize,
+    }).module("ziglua"));
+    // - zmesh
+    const zmesh_pkg = zmesh.package(b, target, optimize, .{});
+    delve_module.linkLibrary(zmesh_pkg.zmesh_c_cpp);
+    delve_module.addImport("zmesh", zmesh_pkg.zmesh);
+    delve_module.addImport("zmesh_options", zmesh_pkg.zmesh_options);
+    // - zstbi
+    const zstbi_pkg = zstbi.package(b, target, optimize, .{});
+    delve_module.linkLibrary(zstbi_pkg.zstbi_c_cpp);
+    delve_module.addImport("zstbi", zstbi_pkg.zstbi);
+
+    // App
+    try append_library(b, target, optimize, step_compile, "assets", "assets/assets.zig");
+    // - sokol
+    step_compile.root_module.addImport("sokol", dep_sokol.module("sokol"));
+    // - delve-framework
+    step_compile.root_module.addImport("delve", delve_module);
+}
+
+fn append_library(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, step_compile: *Build.Step.Compile, comptime name: []const u8, comptime src_path: []const u8) !void {
+    const asset_lib = b.addStaticLibrary(.{
+        .name = name,
+        .root_source_file = .{ .path = src_path },
+        .target = target,
+        .optimize = optimize,
+    });
+    step_compile.linkLibrary(asset_lib);
+    b.installArtifact(asset_lib);
+}
+
+fn append_module(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, step_compile: *Build.Step.Compile, comptime module_name: []const u8) !void {
+    step_compile.root_module.addImport(module_name, b.dependency(module_name, .{
+        .target = target,
+        .optimize = optimize,
+    }).module(module_name));
+}
+
+fn append_dependency(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, step_compile: *Build.Step.Compile, comptime module_name: []const u8) !void {
+    const dependency_module = b.dependency(module_name, .{
+        .target = target,
+        .optimize = optimize,
+    });
+    step_compile.root_module.addImport(module_name, dependency_module.module(module_name));
+}
+
+fn create_delve_module(b: *std.Build, target: Build.ResolvedTarget, optimize: OptimizeMode) *Build.Module {
+    const delve_module = b.addModule("delve", .{
+        .root_source_file = .{ .path = "3rd_party/delve-framework/framework/delve.zig" },
+        .target = target,
+        .optimize = optimize,
+    });
+    return delve_module;
 }
