@@ -20,5 +20,8 @@
         .ziglua = .{
             .path = "3rd_party/ziglua",
         },
+        .zstbi = .{
+            .path = "3rd_party/zstbi",
+        },
     },
 }

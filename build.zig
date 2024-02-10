@@ -3,6 +3,7 @@ const Build = std.Build;
 const OptimizeMode = std.builtin.OptimizeMode;
 const sokol = @import("sokol");
 const zmesh = @import("zmesh");
+const zstbi = @import("zstbi");
 
 pub fn build(b: *Build) !void {
     const target = b.standardTargetOptions(.{});
@@ -66,14 +67,32 @@ fn buildWeb(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, dep
 }
 
 fn setup_links(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, step_compile: *Build.Step.Compile, dep_sokol: *Build.Dependency) !void {
-    try append_library(b, target, optimize, step_compile, "assets", "assets/assets.zig");
 
-    try append_dependency(b, target, optimize, step_compile, "ziglua");
-
-    step_compile.root_module.addImport("sokol", dep_sokol.module("sokol"));
-
+    // Delve module
+    const delve_module = create_delve_module(b, target, optimize);
+    // - sokol
+    delve_module.addImport("sokol", dep_sokol.module("sokol"));
+    // - ziglua
+    delve_module.addImport("ziglua", b.dependency("ziglua", .{
+        .target = target,
+        .optimize = optimize,
+    }).module("ziglua"));
+    // - zmesh
     const zmesh_pkg = zmesh.package(b, target, optimize, .{});
-    zmesh_pkg.link(step_compile);
+    delve_module.linkLibrary(zmesh_pkg.zmesh_c_cpp);
+    delve_module.addImport("zmesh", zmesh_pkg.zmesh);
+    delve_module.addImport("zmesh_options", zmesh_pkg.zmesh_options);
+    // - stb_image
+    const zstbi_pkg = zstbi.package(b, target, optimize, .{});
+    delve_module.linkLibrary(zstbi_pkg.zstbi_c_cpp);
+    delve_module.addImport("zmesh", zstbi_pkg.zstbi);
+
+    // App
+    try append_library(b, target, optimize, step_compile, "assets", "assets/assets.zig");
+    // - sokol
+    step_compile.root_module.addImport("sokol", dep_sokol.module("sokol"));
+    // - delve-framework
+    step_compile.root_module.addImport("delve", delve_module);
 }
 
 fn append_library(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, step_compile: *Build.Step.Compile, comptime name: []const u8, comptime src_path: []const u8) !void {
@@ -104,32 +123,9 @@ fn append_dependency(b: *Build, target: Build.ResolvedTarget, optimize: Optimize
 
 fn create_delve_module(b: *std.Build, target: Build.ResolvedTarget, optimize: OptimizeMode) *Build.Module {
     const delve_module = b.addModule("delve", .{
-        .root_source_file = .{ .path = "src/framework/delve.zig" },
-    });
-
-    const zmesh_pkg = zmesh.package(b, target, optimize, .{});
-
-    delve_module.addImport("zmesh", zmesh_pkg.zmesh);
-
-    return delve_module;
-}
-
-fn create_delve_lib(b: *std.Build, target: Build.ResolvedTarget, optimize: OptimizeMode) *Build.Step.Compile {
-    // Delve library artifact
-    const lib_opts = .{
-        .name = "delve",
+        .root_source_file = .{ .path = "3rd_party/delve-framework/framework/delve.zig" },
         .target = target,
         .optimize = optimize,
-    };
-
-    // make the Delve library as a static lib
-    const lib = b.addStaticLibrary(lib_opts);
-    lib.addCSourceFile(.{ .file = .{ .path = "libs/stb_image-2.28/stb_image_impl.c" }, .flags = &[_][]const u8{"-std=c99"} });
-    lib.addIncludePath(.{ .path = "libs/stb_image-2.28" });
-
-    // let users of our library get access to some headers
-    lib.installHeader("libs/stb_image-2.28/stb_image.h", "stb_image.h");
-
-    b.installArtifact(lib);
-    return lib;
+    });
+    return delve_module;
 }
