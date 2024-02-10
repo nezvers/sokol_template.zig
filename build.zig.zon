@@ -14,5 +14,11 @@
             .url = "git+https://github.com/nezvers/sokol-zig-branch.git#af72c30fd0b6abe200f75f6cd3ad6a2a722d398e",
             .hash = "12207e03150cbd9cf7210a5bab9086cbefc03334a03d2f2bbac257f02bc540c81c0b",
         },
+        .zmesh = .{
+            .path = "3rd_party/zmesh",
+        },
+        .ziglua = .{
+            .path = "3rd_party/ziglua",
+        },
     },
 }

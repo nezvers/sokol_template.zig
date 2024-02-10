@@ -2,6 +2,7 @@ const std = @import("std");
 const Build = std.Build;
 const OptimizeMode = std.builtin.OptimizeMode;
 const sokol = @import("sokol");
+const zmesh = @import("zmesh");
 
 pub fn build(b: *Build) !void {
     const target = b.standardTargetOptions(.{});
@@ -27,8 +28,9 @@ fn buildNative(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, 
         .optimize = optimize,
         .root_source_file = .{ .path = "src/main.zig" },
     });
-    my_template.root_module.addImport("sokol", dep_sokol.module("sokol"));
-    try append_libraries(b, target, optimize, my_template);
+    //my_template.root_module.addImport("sokol", dep_sokol.module("sokol"));
+    try setup_links(b, target, optimize, my_template, dep_sokol);
+
     b.installArtifact(my_template);
     const run = b.addRunArtifact(my_template);
     b.step("run", "Run my_template").dependOn(&run.step);
@@ -42,8 +44,8 @@ fn buildWeb(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, dep
         .optimize = optimize,
         .root_source_file = .{ .path = "src/main.zig" },
     });
-    my_template.root_module.addImport("sokol", dep_sokol.module("sokol"));
-    try append_libraries(b, target, optimize, my_template);
+    //my_template.root_module.addImport("sokol", dep_sokol.module("sokol"));
+    try setup_links(b, target, optimize, my_template, dep_sokol);
 
     // create a build step which invokes the Emscripten linker
     const emsdk = dep_sokol.builder.dependency("emsdk", .{});
@@ -63,15 +65,36 @@ fn buildWeb(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, dep
     b.step("run", "Run my_template").dependOn(&run.step);
 }
 
-fn append_libraries(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, app: *Build.Step.Compile) !void {
+fn setup_links(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, step_compile: *Build.Step.Compile, dep_sokol: *Build.Dependency) !void {
+    try append_library(b, target, optimize, step_compile, "assets", "assets/assets.zig");
+
+    try append_dependency(b, target, optimize, step_compile, "ziglua");
+
+    step_compile.root_module.addImport("sokol", dep_sokol.module("sokol"));
+}
+
+fn append_library(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, step_compile: *Build.Step.Compile, comptime name: []const u8, comptime src_path: []const u8) !void {
     const asset_lib = b.addStaticLibrary(.{
-        .name = "assets",
-        // In this case the main source file is merely a path, however, in more
-        // complicated build scripts, this could be a generated file.
-        .root_source_file = .{ .path = "assets/assets.zig" },
+        .name = name,
+        .root_source_file = .{ .path = src_path },
         .target = target,
         .optimize = optimize,
     });
-    app.linkLibrary(asset_lib);
+    step_compile.linkLibrary(asset_lib);
     b.installArtifact(asset_lib);
+}
+
+fn append_module(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, step_compile: *Build.Step.Compile, comptime module_name: []const u8) !void {
+    step_compile.root_module.addImport(module_name, b.dependency(module_name, .{
+        .target = target,
+        .optimize = optimize,
+    }).module(module_name));
+}
+
+fn append_dependency(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, step_compile: *Build.Step.Compile, comptime module_name: []const u8) !void {
+    const dependency_module = b.dependency(module_name, .{
+        .target = target,
+        .optimize = optimize,
+    });
+    step_compile.root_module.addImport(module_name, dependency_module.module(module_name));
 }

@@ -168,6 +168,20 @@ pub const Mat4 = extern struct {
         return res;
     }
 
+    pub fn ortho(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) Mat4 {
+        var res = Mat4.zero();
+        res.m[0][0] = 2.0 / (right - left);
+        res.m[1][1] = 2.0 / (top - bottom);
+        res.m[2][2] = 2.0 / (near - far);
+        res.m[3][3] = 1.0;
+
+        res.m[3][0] = (left + right) / (left - right);
+        res.m[3][1] = (bottom + top) / (bottom - top);
+        res.m[3][2] = (near + far) / (near - far);
+
+        return res;
+    }
+
     pub fn lookat(eye: Vec3, center: Vec3, up: Vec3) Mat4 {
         var res = Mat4.zero();
 
@@ -214,6 +228,28 @@ pub const Mat4 = extern struct {
         res.m[2][2] = (axis.z * axis.z * cos_value) + cos_theta;
 
         return res;
+    }
+
+    pub fn direction(dir_norm: Vec3, axis_norm: Vec3) Mat4 {
+        var res = Mat4.identity();
+
+        var xaxis: Vec3 = axis_norm.cross(dir_norm);
+        xaxis = xaxis.norm();
+
+        var yaxis: Vec3 = dir_norm.cross(xaxis);
+        yaxis = yaxis.norm();
+
+        res.m[0][0] = xaxis.x;
+        res.m[0][1] = yaxis.x;
+        res.m[0][2] = dir_norm.x;
+        res.m[1][0] = xaxis.y;
+        res.m[1][1] = yaxis.y;
+        res.m[1][2] = dir_norm.y;
+        res.m[2][0] = xaxis.z;
+        res.m[2][1] = yaxis.z;
+        res.m[2][2] = dir_norm.z;
+
+        return res.transpose();
     }
 
     pub fn translate(translation: Vec3) Mat4 {
