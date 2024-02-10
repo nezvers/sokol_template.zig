@@ -81,7 +81,7 @@ pub const Mesh = struct {
 
         var material: graphics.Material = undefined;
         if (cfg.material == null) {
-            var tex = graphics.createDebugTexture();
+            const tex = graphics.createDebugTexture();
             material = graphics.Material.init(.{ .texture_0 = tex });
         } else {
             material = cfg.material.?;
@@ -243,12 +243,12 @@ pub const MeshBuilder = struct {
         const rect_top = Rect.newCentered(math.Vec2.zero(), math.Vec2.new(size.x, size.z));
         const rect_bottom = Rect.newCentered(math.Vec2.zero(), math.Vec2.new(size.x, size.z));
 
-        const rot_west = math.Mat4.rotate(-90, Vec3.new(0,1,0));
-        const rot_east = math.Mat4.rotate(90, Vec3.new(0,1,0));
-        const rot_north = math.Mat4.rotate(180, Vec3.new(0,1,0));
-        const rot_south = math.Mat4.rotate(0, Vec3.new(0,1,0));
-        const rot_top = math.Mat4.rotate(-90, Vec3.new(1,0,0));
-        const rot_bottom = math.Mat4.rotate(90, Vec3.new(1,0,0));
+        const rot_west = math.Mat4.rotate(-90, Vec3.new(0, 1, 0));
+        const rot_east = math.Mat4.rotate(90, Vec3.new(0, 1, 0));
+        const rot_north = math.Mat4.rotate(180, Vec3.new(0, 1, 0));
+        const rot_south = math.Mat4.rotate(0, Vec3.new(0, 1, 0));
+        const rot_top = math.Mat4.rotate(-90, Vec3.new(1, 0, 0));
+        const rot_bottom = math.Mat4.rotate(90, Vec3.new(1, 0, 0));
 
         try self.addRect(rect_west, transform.mul(math.Mat4.translate(Vec3.new(pos.x - size.x * 0.5, pos.y, pos.z)).mul(rot_west)), color);
         try self.addRect(rect_east, transform.mul(math.Mat4.translate(Vec3.new(pos.x + size.x * 0.5, pos.y, pos.z)).mul(rot_east)), color);
@@ -260,7 +260,7 @@ pub const MeshBuilder = struct {
 
     /// Bakes a mesh out of the mesh builder from the current state
     pub fn buildMesh(self: *const MeshBuilder, material: graphics.Material) Mesh {
-        var layout = graphics.VertexLayout{
+        const layout = graphics.VertexLayout{
             .attributes = &[_]graphics.VertexLayoutAttribute{
                 .{ .binding = .VERT_PACKED, .buffer_slot = 0, .item_size = @sizeOf(Vertex) },
             },

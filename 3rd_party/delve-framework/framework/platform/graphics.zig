@@ -315,7 +315,7 @@ pub const Texture = struct {
             .pixel_format = .RGBA8,
         };
 
-        img_desc.data.subimage[0][0] = sg.asRange(image.raw);
+        img_desc.data.subimage[0][0] = sg.asRange(image.data);
 
         return Texture{
             .width = image.width,
@@ -356,7 +356,7 @@ pub const Texture = struct {
             .sample_count = 1,
         };
 
-        if(is_depth)
+        if (is_depth)
             img_desc.pixel_format = .DEPTH_STENCIL;
 
         return Texture{
@@ -369,7 +369,7 @@ pub const Texture = struct {
     }
 
     pub fn destroy(self: *Texture) void {
-        if(self.sokol_image == null)
+        if (self.sokol_image == null)
             return;
         sg.destroyImage(self.sokol_image.?);
         self.sokol_image = null;
@@ -391,7 +391,7 @@ pub const RenderPass = struct {
 
         pass_desc.color_attachments[0].image = color_attachment.sokol_image.?;
 
-        if(include_depth) {
+        if (include_depth) {
             depth_attachment = Texture.initRenderTexture(width, height, true);
             pass_desc.depth_stencil_attachment.image = depth_attachment.?.sokol_image.?;
         }
@@ -405,17 +405,17 @@ pub const RenderPass = struct {
 
     /// Destroys a render pass and its associated textures
     pub fn destroy(self: *RenderPass) void {
-        if(self.render_texture_color != null) {
+        if (self.render_texture_color != null) {
             self.render_texture_color.destroy();
             self.render_texture_color = null;
         }
 
-        if(self.render_texture_depth != null) {
+        if (self.render_texture_depth != null) {
             self.render_texture_depth.destroy();
             self.render_texture_depth = null;
         }
 
-        if(self.sokol_pass != null) {
+        if (self.sokol_pass != null) {
             sg.destroyPass(self.sokol_pass);
             self.sokol_pass = null;
         }
@@ -428,11 +428,17 @@ pub fn beginPass(render_pass: RenderPass, clear_color: ?Color) void {
     sg.endPass();
 
     var pass_action = sg.PassAction{};
-    pass_action.colors[0] = .{ .load_action = .LOAD, };
-    pass_action.depth = .{ .load_action = .LOAD, };
-    pass_action.stencil = .{ .load_action = .LOAD, };
+    pass_action.colors[0] = .{
+        .load_action = .LOAD,
+    };
+    pass_action.depth = .{
+        .load_action = .LOAD,
+    };
+    pass_action.stencil = .{
+        .load_action = .LOAD,
+    };
 
-    if(clear_color != null) {
+    if (clear_color != null) {
         pass_action.colors[0].load_action = .CLEAR;
         pass_action.colors[0].clear_value = .{ .r = clear_color.?.r, .g = clear_color.?.g, .b = clear_color.?.b, .a = clear_color.?.a };
     }
@@ -443,11 +449,17 @@ pub fn beginPass(render_pass: RenderPass, clear_color: ?Color) void {
 /// Begins the default (render to screen) pass
 pub fn beginDefaultPass(clear: bool) void {
     var pass_action = sg.PassAction{};
-    pass_action.colors[0] = .{ .load_action = .LOAD, };
-    pass_action.depth = .{ .load_action = .LOAD, };
-    pass_action.stencil = .{ .load_action = .LOAD, };
+    pass_action.colors[0] = .{
+        .load_action = .LOAD,
+    };
+    pass_action.depth = .{
+        .load_action = .LOAD,
+    };
+    pass_action.stencil = .{
+        .load_action = .LOAD,
+    };
 
-    if(clear) {
+    if (clear) {
         pass_action.colors[0].load_action = .CLEAR;
         pass_action.colors[0].clear_value = default_pass_action.colors[0].clear_value;
     }
@@ -903,7 +915,7 @@ pub fn drawDebugRectangle(tex: Texture, x: f32, y: f32, width: f32, height: f32,
 
     // create a view state
     var proj = getProjectionOrtho(0.001, 10.0, false);
-    var view = Mat4.lookat(.{ .x = 0.0, .y = 0.0, .z = 5.0 }, Vec3.zero(), Vec3.up());
+    const view = Mat4.lookat(.{ .x = 0.0, .y = 0.0, .z = 5.0 }, Vec3.zero(), Vec3.up());
 
     const translate_vec: Vec3 = Vec3{ .x = x, .y = @as(f32, @floatFromInt(getDisplayHeight())) - (y + height), .z = -2.5 };
     const scale_vec: Vec3 = Vec3{ .x = width, .y = height, .z = 1.0 };

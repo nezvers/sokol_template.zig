@@ -1,6 +1,5 @@
 const std = @import("std");
 const debug = @import("debug.zig");
-const images = @import("images.zig");
 const colors = @import("colors.zig");
 const modules = @import("modules.zig");
 const scripting = @import("scripting/manager.zig");
@@ -8,7 +7,7 @@ const scripting = @import("scripting/manager.zig");
 // Main systems
 const app_backend = @import("platform/app.zig");
 const input = @import("platform/input.zig");
-const audio = @import("platform/audio.zig");
+//const audio = @import("platform/audio.zig");
 
 pub var assets_path: [:0]const u8 = "assets";
 
@@ -49,12 +48,12 @@ pub fn startSubsystems() !void {
     try colors.init();
     try input.init();
     try scripting.init();
-    try audio.init();
+    //try audio.init();
 }
 
 pub fn stopSubsystems() void {
     colors.deinit();
     input.deinit();
     scripting.deinit();
-    audio.deinit();
+    //audio.deinit();
 }

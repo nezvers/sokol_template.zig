@@ -5,6 +5,8 @@ const sokol = @import("sokol");
 const zmesh = @import("zmesh");
 const zstbi = @import("zstbi");
 
+const root_source_file = "3rd_party/delve-framework/examples/forest.zig";
+
 pub fn build(b: *Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
@@ -27,7 +29,8 @@ fn buildNative(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, 
         .name = "my_template",
         .target = target,
         .optimize = optimize,
-        .root_source_file = .{ .path = "src/main.zig" },
+        //.root_source_file = .{ .path = "src/main.zig" },
+        .root_source_file = .{ .path = root_source_file },
     });
     //my_template.root_module.addImport("sokol", dep_sokol.module("sokol"));
     try setup_links(b, target, optimize, my_template, dep_sokol);
@@ -43,7 +46,8 @@ fn buildWeb(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, dep
         .name = "my_template",
         .target = target,
         .optimize = optimize,
-        .root_source_file = .{ .path = "src/main.zig" },
+        //.root_source_file = .{ .path = "src/main.zig" },
+        .root_source_file = .{ .path = root_source_file },
     });
     //my_template.root_module.addImport("sokol", dep_sokol.module("sokol"));
     try setup_links(b, target, optimize, my_template, dep_sokol);
@@ -82,10 +86,10 @@ fn setup_links(b: *Build, target: Build.ResolvedTarget, optimize: OptimizeMode, 
     delve_module.linkLibrary(zmesh_pkg.zmesh_c_cpp);
     delve_module.addImport("zmesh", zmesh_pkg.zmesh);
     delve_module.addImport("zmesh_options", zmesh_pkg.zmesh_options);
-    // - stb_image
+    // - zstbi
     const zstbi_pkg = zstbi.package(b, target, optimize, .{});
     delve_module.linkLibrary(zstbi_pkg.zstbi_c_cpp);
-    delve_module.addImport("zmesh", zstbi_pkg.zstbi);
+    delve_module.addImport("zstbi", zstbi_pkg.zstbi);
 
     // App
     try append_library(b, target, optimize, step_compile, "assets", "assets/assets.zig");
