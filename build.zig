@@ -5,7 +5,7 @@ const sokol = @import("sokol");
 const zmesh = @import("zmesh");
 const zstbi = @import("zstbi");
 
-const root_source_file = "3rd_party/delve-framework/examples/meshes.zig";
+const root_source_file = "3rd_party/delve-framework/examples/forest.zig";
 
 // zig build -freference-trace run
 

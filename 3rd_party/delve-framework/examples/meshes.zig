@@ -23,6 +23,7 @@ var mesh_test: ?mesh.Mesh = null;
 var camera: cam.Camera = undefined;
 
 // This example shows loading and drawing meshes
+const asset_path = "";
 
 pub fn main() !void {
     try registerModule();
@@ -52,7 +53,7 @@ fn on_init() void {
     camera.direction = Vec3.new(0.0, 0.0, 1.0);
 
     // Load the base color texture for the mesh
-    const base_texture_file = "meshes/SciFiHelmet_BaseColor_512.png";
+    const base_texture_file = asset_path ++ "meshes/SciFiHelmet_BaseColor_512.png";
     var base_img: images.Image = images.loadFile(base_texture_file) catch {
         debug.log("Assets: Error loading image asset: {s}", .{base_texture_file});
         return;
@@ -60,7 +61,7 @@ fn on_init() void {
     const tex_base = graphics.Texture.init(&base_img);
 
     // Load the emissive texture for the mesh
-    const emissive_texture_file = "meshes/SciFiHelmet_Emissive_512.png";
+    const emissive_texture_file = asset_path ++ "meshes/SciFiHelmet_Emissive_512.png";
     var emissive_img: images.Image = images.loadFile(emissive_texture_file) catch {
         debug.log("Assets: Error loading image asset: {s}", .{emissive_texture_file});
         return;
@@ -83,7 +84,7 @@ fn on_init() void {
     });
 
     // Load our mesh!
-    mesh_test = mesh.Mesh.initFromFile("meshes/SciFiHelmet.gltf", .{ .material = material });
+    mesh_test = mesh.Mesh.initFromFile(asset_path ++ "meshes/SciFiHelmet.gltf", .{ .material = material });
 }
 
 fn on_tick(delta: f32) void {

@@ -41,8 +41,8 @@ pub const Mesh = struct {
 
         var mesh_indices = std.ArrayList(u32).init(allocator);
         var mesh_positions = std.ArrayList([3]f32).init(allocator);
-        var mesh_normals = std.ArrayList([3]f32).init(allocator);
         var mesh_texcoords = std.ArrayList([2]f32).init(allocator);
+        var mesh_normals = std.ArrayList([3]f32).init(allocator);
         var mesh_tangents = std.ArrayList([4]f32).init(allocator);
 
         defer mesh_indices.deinit();
