@@ -64,6 +64,11 @@ pub const BindingsImpl = struct {
         return bindings;
     }
 
+    fn conv_to_anyopaque(vertex_binding: anytype) ?*const anyopaque {
+        const value: ?*const anyopaque = @ptrCast(&vertex_binding);
+        return value;
+    }
+
     pub fn set(self: *Bindings, vertices: anytype, indices: anytype, opt_normals: anytype, opt_tangents: anytype, length: usize) void {
         if (self.impl.sokol_bindings == null) {
             return;
@@ -75,8 +80,8 @@ pub const BindingsImpl = struct {
             self.impl.sokol_bindings.?.vertex_buffers[idx] = sg.makeBuffer(.{
                 .data = switch (attr.binding) {
                     .VERT_PACKED => sg.asRange(vertices),
-                    .VERT_NORMALS => sg.asRange(&opt_normals),
-                    .VERT_TANGENTS => sg.asRange(&opt_tangents),
+                    .VERT_NORMALS => sg.asRange(opt_normals),
+                    .VERT_TANGENTS => sg.asRange(opt_tangents),
                 },
             });
         }

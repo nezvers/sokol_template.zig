@@ -5,7 +5,21 @@ const sokol = @import("sokol");
 const zmesh = @import("zmesh");
 const zstbi = @import("zstbi");
 
-const root_source_file = "3rd_party/delve-framework/examples/forest.zig";
+const root_source_file = "3rd_party/delve-framework/examples/meshes.zig";
+
+// zig build -freference-trace run
+
+// Module = Build.Step.Compile.root_module
+// Module = Build.addModule
+// Compile = Build.addStaticLibrary()
+// Compile = Build.addExecutable()
+
+// Dependency = Build.dependency()
+// Module.addShallowDependencies(Module) - adds dependency
+// Module.addImport("name", module: *Module) - adds dependency implicitly
+// Module.addStepDependencies(module, *Step)
+// Module.addStepDependenciesOnly(*Step)
+// Build.Compile.step.dependOn(*Step)
 
 pub fn build(b: *Build) !void {
     const target = b.standardTargetOptions(.{});
