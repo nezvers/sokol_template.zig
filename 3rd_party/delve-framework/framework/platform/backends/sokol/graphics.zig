@@ -80,8 +80,8 @@ pub const BindingsImpl = struct {
             self.impl.sokol_bindings.?.vertex_buffers[idx] = sg.makeBuffer(.{
                 .data = switch (attr.binding) {
                     .VERT_PACKED => sg.asRange(vertices),
-                    .VERT_NORMALS => sg.asRange(&opt_normals),
-                    .VERT_TANGENTS => sg.asRange(&opt_tangents),
+                    .VERT_NORMALS => sg.asRange(opt_normals),
+                    .VERT_TANGENTS => sg.asRange(opt_tangents),
                 },
             });
         }

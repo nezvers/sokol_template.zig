@@ -819,7 +819,7 @@ pub fn init() !void {
     const debug_indices = &[_]u32{ 0, 1, 2, 0, 2, 3 };
 
     state.debug_draw_bindings = Bindings.init(.{});
-    state.debug_draw_bindings.set(debug_vertices, debug_indices, &.{}, &.{}, 6);
+    state.debug_draw_bindings.set(debug_vertices, debug_indices, &[_]u32{}, &[_]u32{}, 6);
 
     // Use the default shader for debug drawing
     state.debug_shader = Shader.initDefault(.{ .cull_mode = .NONE });
